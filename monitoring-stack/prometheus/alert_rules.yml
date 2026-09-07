@@ -1,0 +1,30 @@
+# Cac quy tac canh bao ha tang Proxmox VE
+groups:
+  - name: proxmox-alerts
+    rules:
+      # Canh bao khi host Proxmox bi mat ket noi
+      - alert: ProxmoxNodeDown
+        expr: up{job="proxmox-host"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Host Proxmox {{ $labels.node }} bi mat ket noi!"
+
+      # Canh bao khi RAM he thong vuot qua 85%
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Host {{ $labels.node }} su dung RAM vuot qua 85% trong hon 5 phut!"
+
+      # Canh bao khi ZFS pool bi loi hoac degraded
+      - alert: ZfsPoolDegraded
+        expr: node_zfs_zpool_state{state!="online"} > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Phat hien ZFS pool bi hong hoac o dia bi loi tren host {{ $labels.node }}!"

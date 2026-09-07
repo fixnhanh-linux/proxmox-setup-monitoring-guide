@@ -1,0 +1,28 @@
+# Cau hinh Prometheus cao du lieu tu Proxmox va Exporter
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "alert_rules.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["alertmanager:9093"]
+
+scrape_configs:
+  # Cao metrics tu Node Exporter tren host Proxmox
+  - job_name: "proxmox-host"
+    static_configs:
+      - targets: ["127.0.0.1:9100"]
+        labels:
+          node: "pve-node-01"
+
+  # Cao metrics tu PVE Exporter (neu co cai them de lay metrics tung VM)
+  - job_name: "pve-exporter"
+    metrics_path: /pve
+    params:
+      module: ["default"]
+    static_configs:
+      - targets: ["127.0.0.1:9221"]
